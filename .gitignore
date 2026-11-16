@@ -1,0 +1,41 @@
+# 기본은 전부 제외하고, 재현에 필요한 것만 아래에서 허용한다.
+/*
+
+!/.gitignore
+!/.env.example
+!/README.md
+!/requirements.txt
+!/setup_data.py
+
+# 코드
+!/customer/
+!/planning/
+!/policy_enrich/
+!/spending_report/
+!/tests/
+!/colab/
+
+# 정책 DB는 압축본만 올린다 (원본 117MB는 setup_data.py가 푼다)
+!/data/
+/data/*
+!/data/youth_policy_enriched.db.gz
+
+# 가상 고객 입력 문서 (Fact Finding, 원천징수영수증)
+!/가상고객데이터/
+/가상고객데이터/*
+!/가상고객데이터/01_FACT_FINDING_김도윤_가상학습용.hwp
+!/가상고객데이터/02_근로소득원천징수영수증_가상학습용.docx
+!/가상고객데이터/빈칸형_가상고객_4명/
+
+# 캐시, 비밀값, 생성물
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.env
+.env.*
+!.env.example
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.log

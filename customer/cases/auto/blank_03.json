@@ -1,0 +1,518 @@
+{
+ "case_id": "blank_03",
+ "profile_version": "v1",
+ "as_of_date": "2026-11-08",
+ "is_synthetic": true,
+ "note": "문서에서 자동 생성. 빈칸은 미확인, 어림값은 추정으로 저장.",
+ "default_source": "가상고객데이터/빈칸형_가상고객_4명/03_이서연/01_FACT_FINDING.hwp",
+ "tax_source": "가상고객데이터/빈칸형_가상고객_4명/03_이서연/02_사업소득_원천징수영수증.docx",
+ "cashflow_source": "가상고객데이터/빈칸형_가상고객_4명/03_이서연/01_FACT_FINDING.hwp",
+ "facts": {
+  "doc_fact_finding": {
+   "value": "가상고객데이터/빈칸형_가상고객_4명/03_이서연/01_FACT_FINDING.hwp"
+  },
+  "doc_withholding": {
+   "value": "가상고객데이터/빈칸형_가상고객_4명/03_이서연/02_사업소득_원천징수영수증.docx"
+  },
+  "unverified_income": {
+   "value": null,
+   "source_ref": "7. 현금흐름표",
+   "unit": "KRW"
+  },
+  "unverified_outflow": {
+   "value": null,
+   "source_ref": "7. 현금흐름표",
+   "unit": "KRW"
+  },
+  "name": {
+   "value": "이서연",
+   "source_ref": "1. 기본정보"
+  },
+  "birth_date": {
+   "value": "1994-09-16",
+   "status": "추정",
+   "source_ref": "1. 기본정보",
+   "assumptions": "FF에 없어 원천징수영수증 주민번호 앞자리에서 가져옴"
+  },
+  "sex": {
+   "value": "여",
+   "source_ref": "1. 기본정보"
+  },
+  "address": {
+   "value": "서울 마포구",
+   "source_ref": "1. 기본정보"
+  },
+  "region_sido": {
+   "value": "서울",
+   "source_ref": "1. 기본정보"
+  },
+  "region_sigungu": {
+   "value": "마포구",
+   "source_ref": "1. 기본정보"
+  },
+  "region_code": {
+   "value": "11440",
+   "status": "추정",
+   "assumptions": "주소의 시군구를 행정표준코드로 변환"
+  },
+  "occupation": {
+   "value": "프리랜서 디자인",
+   "source_ref": "1. 기본정보"
+  },
+  "employment_status": {
+   "value": "프리랜서",
+   "source_ref": "1. 기본정보·영수증"
+  },
+  "employer_size": {
+   "value": null,
+   "status": "해당없음"
+  },
+  "marital_status": {
+   "value": null,
+   "source_ref": "3. 결혼계획·메모"
+  },
+  "household_size": {
+   "value": 1,
+   "status": "추정",
+   "source_ref": "메모",
+   "assumptions": "메모의 가족 설명으로 판단",
+   "unit": "명"
+  },
+  "parents_household": {
+   "value": null
+  },
+  "military_service": {
+   "value": null
+  },
+  "national_pension_expected": {
+   "value": null
+  },
+  "credit_score": {
+   "value": null,
+   "unit": "점"
+  },
+  "risk_profile": {
+   "value": null,
+   "source_ref": "5. 투자성향"
+  },
+  "main_bank": {
+   "value": "은행 2곳 / 증권사 2곳",
+   "source_ref": "1. 기본정보"
+  },
+  "payday": {
+   "value": "거래처마다 다름",
+   "source_ref": "1. 기본정보"
+  },
+  "housing_tenure": {
+   "value": "월세",
+   "source_ref": "4. 주택계획"
+  },
+  "housing_type": {
+   "value": null,
+   "source_ref": "4. 주택계획"
+  },
+  "home_owner": {
+   "value": false,
+   "source_ref": "4. 주택계획"
+  },
+  "rent_deposit": {
+   "value": 70000000,
+   "source_ref": "4. 주택계획",
+   "unit": "KRW"
+  },
+  "rent_monthly": {
+   "value": 1100000,
+   "source_ref": "4. 주택계획",
+   "unit": "KRW"
+  }
+ },
+ "income_items": [
+  {
+   "source_id": "현금흐름표",
+   "kind": "사업",
+   "basis": "세후 입금",
+   "period": "월",
+   "tax_year": 2026,
+   "amount_won": 10500000,
+   "low_won": 6000000,
+   "high_won": 15000000,
+   "in_cashflow": true,
+   "status": "추정",
+   "source_ref": "7. 현금흐름표",
+   "assumptions": "원문: 들어오는 달은 600~1,500"
+  },
+  {
+   "source_id": "현금흐름표",
+   "kind": "기타",
+   "basis": "성과금",
+   "period": "월",
+   "tax_year": 2026,
+   "amount_won": null,
+   "low_won": null,
+   "high_won": null,
+   "in_cashflow": true,
+   "status": "미확인",
+   "source_ref": "7. 현금흐름표",
+   "assumptions": null
+  },
+  {
+   "source_id": "현금흐름표",
+   "kind": "기타",
+   "basis": "기타소득",
+   "period": "월",
+   "tax_year": 2026,
+   "amount_won": null,
+   "low_won": null,
+   "high_won": null,
+   "in_cashflow": true,
+   "status": "미확인",
+   "source_ref": "7. 현금흐름표",
+   "assumptions": null
+  },
+  {
+   "source_id": "사업",
+   "kind": "사업",
+   "basis": "지급총액(원천징수영수증)",
+   "period": "연",
+   "tax_year": 2025,
+   "amount_won": 132000000,
+   "status": "확인",
+   "source_ref": "합계 지급총액",
+   "assumptions": "월 지급액 8,000,000~14,000,000원. 필요경비와 다른 지급처는 미확인"
+  }
+ ],
+ "tax_items": [
+  {
+   "tax_year": 2025,
+   "filing": "원천징수",
+   "item": "원천징수 소득세",
+   "amount_won": 3960000,
+   "status": "확인",
+   "source_ref": "합계 소득세"
+  },
+  {
+   "tax_year": 2025,
+   "filing": "원천징수",
+   "item": "원천징수 지방소득세",
+   "amount_won": 396000,
+   "status": "확인",
+   "source_ref": "합계 지방소득세"
+  }
+ ],
+ "assets": [
+  {
+   "asset_id": "a-bank-0",
+   "kind": "파킹",
+   "name": "CMA",
+   "institution": null,
+   "balance_won": 12000000,
+   "monthly_contribution_won": null,
+   "rate_pct": null,
+   "earmark": null,
+   "liquidity": "즉시",
+   "status": "추정",
+   "source_ref": "6-1) 은행상품",
+   "assumptions": "1,200 정도"
+  },
+  {
+   "asset_id": "a-bank-1",
+   "kind": "세금준비금",
+   "name": "세금 통장",
+   "institution": null,
+   "balance_won": 15000000,
+   "monthly_contribution_won": null,
+   "rate_pct": null,
+   "earmark": "세금 납부 준비",
+   "liquidity": "즉시",
+   "status": "추정",
+   "source_ref": "6-1) 은행상품",
+   "assumptions": "1,500쯤"
+  },
+  {
+   "asset_id": "a-bank-2",
+   "kind": "정기예금",
+   "name": "예금",
+   "institution": null,
+   "balance_won": 50000000,
+   "monthly_contribution_won": null,
+   "rate_pct": null,
+   "earmark": null,
+   "liquidity": "만기",
+   "status": "기재",
+   "source_ref": "6-1) 은행상품",
+   "assumptions": "5,000"
+  },
+  {
+   "asset_id": "a-sec-0",
+   "kind": "주식",
+   "name": "미국 주식 여러 개",
+   "principal_won": 30000000,
+   "balance_won": null,
+   "earmark": null,
+   "liquidity": "즉시",
+   "status": "미확인",
+   "source_ref": "6-2) 증권상품",
+   "assumptions": "평가액 미기재"
+  },
+  {
+   "asset_id": "a-sec-1",
+   "kind": "연금저축",
+   "name": "연금저축펀드",
+   "principal_won": null,
+   "balance_won": 12000000,
+   "earmark": "노후",
+   "liquidity": "해지손실",
+   "status": "추정",
+   "source_ref": "6-2) 증권상품",
+   "assumptions": null
+  },
+  {
+   "asset_id": "a-deposit",
+   "kind": "임차보증금",
+   "balance_won": 70000000,
+   "liquidity": "계약종료",
+   "status": "기재",
+   "source_ref": "4. 주택계획"
+  }
+ ],
+ "liabilities": [],
+ "cashflow_items": [
+  {
+   "section": "저축",
+   "item": "예/적금 ①",
+   "monthly_won": null,
+   "low_won": null,
+   "high_won": null,
+   "status": "미확인",
+   "source_ref": "7. 현금흐름표"
+  },
+  {
+   "section": "저축",
+   "item": "예/적금 ②",
+   "monthly_won": null,
+   "low_won": null,
+   "high_won": null,
+   "status": "미확인",
+   "source_ref": "7. 현금흐름표"
+  },
+  {
+   "section": "저축",
+   "item": "주택청약",
+   "monthly_won": null,
+   "low_won": null,
+   "high_won": null,
+   "status": "미확인",
+   "source_ref": "7. 현금흐름표"
+  },
+  {
+   "section": "저축",
+   "item": "펀드/ETF",
+   "monthly_won": null,
+   "low_won": null,
+   "high_won": null,
+   "status": "미확인",
+   "source_ref": "7. 현금흐름표"
+  },
+  {
+   "section": "저축",
+   "item": "주식",
+   "monthly_won": null,
+   "low_won": null,
+   "high_won": null,
+   "status": "미확인",
+   "source_ref": "7. 현금흐름표"
+  },
+  {
+   "section": "저축",
+   "item": "개인연금",
+   "monthly_won": null,
+   "low_won": null,
+   "high_won": null,
+   "status": "미확인",
+   "source_ref": "7. 현금흐름표"
+  },
+  {
+   "section": "보험",
+   "item": "보장성보험",
+   "monthly_won": 30000,
+   "low_won": 30000,
+   "high_won": 30000,
+   "status": "추정",
+   "source_ref": "7. 현금흐름표",
+   "linked_asset_id": null,
+   "assumptions": "7번 표가 비어 있어 6번 보험표 월 보험료 합계에서 가져옴"
+  },
+  {
+   "section": "고정지출",
+   "item": "월 임대료",
+   "monthly_won": 1100000,
+   "low_won": 1100000,
+   "high_won": 1100000,
+   "status": "기재",
+   "source_ref": "7. 현금흐름표"
+  },
+  {
+   "section": "고정지출",
+   "item": "대출 원리금",
+   "monthly_won": null,
+   "low_won": null,
+   "high_won": null,
+   "status": "미확인",
+   "source_ref": "7. 현금흐름표"
+  },
+  {
+   "section": "고정지출",
+   "item": "기타 세금",
+   "monthly_won": null,
+   "low_won": null,
+   "high_won": null,
+   "status": "미확인",
+   "source_ref": "7. 현금흐름표"
+  },
+  {
+   "section": "고정지출",
+   "item": "부모님 용돈",
+   "monthly_won": null,
+   "low_won": null,
+   "high_won": null,
+   "status": "미확인",
+   "source_ref": "7. 현금흐름표"
+  },
+  {
+   "section": "고정지출",
+   "item": "통신비",
+   "monthly_won": null,
+   "low_won": null,
+   "high_won": null,
+   "status": "미확인",
+   "source_ref": "7. 현금흐름표"
+  },
+  {
+   "section": "고정지출",
+   "item": "교통비",
+   "monthly_won": null,
+   "low_won": null,
+   "high_won": null,
+   "status": "미확인",
+   "source_ref": "7. 현금흐름표"
+  },
+  {
+   "section": "고정지출",
+   "item": "기타",
+   "monthly_won": null,
+   "low_won": null,
+   "high_won": null,
+   "status": "미확인",
+   "source_ref": "7. 현금흐름표"
+  },
+  {
+   "section": "변동지출",
+   "item": "생활비",
+   "monthly_won": 3000000,
+   "low_won": 2500000,
+   "high_won": 3500000,
+   "status": "추정",
+   "source_ref": "7. 현금흐름표",
+   "detail": "원문: 카드값 250~350 / 카드값에는 디자인 프로그램, 노트북 할부, 업무폰, 개인 밥값과 쇼핑이 같이 있어요.",
+   "purpose": "혼합"
+  },
+  {
+   "section": "변동지출",
+   "item": "자기개발비",
+   "monthly_won": null,
+   "low_won": null,
+   "high_won": null,
+   "status": "미확인",
+   "source_ref": "7. 현금흐름표"
+  },
+  {
+   "section": "변동지출",
+   "item": "문화생활비",
+   "monthly_won": null,
+   "low_won": null,
+   "high_won": null,
+   "status": "미확인",
+   "source_ref": "7. 현금흐름표"
+  },
+  {
+   "section": "변동지출",
+   "item": "경조사비",
+   "monthly_won": null,
+   "low_won": null,
+   "high_won": null,
+   "status": "미확인",
+   "source_ref": "7. 현금흐름표"
+  },
+  {
+   "section": "변동지출",
+   "item": "기타",
+   "monthly_won": null,
+   "low_won": null,
+   "high_won": null,
+   "status": "미확인",
+   "source_ref": "7. 현금흐름표"
+  }
+ ],
+ "insurance_contracts": [
+  {
+   "contract_id": "i-1",
+   "name": "실비",
+   "contractor": "부모님 같음",
+   "insured": "본인",
+   "monthly_premium_won": 30000,
+   "coverage_summary": null,
+   "started_on": null,
+   "pay_term": null,
+   "coverage_end": null,
+   "status": "추정",
+   "source_ref": "6-3) 보험상품"
+  },
+  {
+   "contract_id": "i-2",
+   "name": "저축보험?",
+   "contractor": null,
+   "insured": null,
+   "monthly_premium_won": 200000,
+   "coverage_summary": "은행에서 가입",
+   "started_on": null,
+   "pay_term": null,
+   "coverage_end": null,
+   "status": "추정",
+   "source_ref": "6-3) 보험상품"
+  }
+ ],
+ "goals": [
+  {
+   "goal_id": "g-1",
+   "term": "단기",
+   "name": "생활예비금",
+   "due": "2027-11",
+   "amount_won": 30000000,
+   "amount_basis": "일시금",
+   "value_basis": "미확인",
+   "status": "기재",
+   "source_ref": "2. 재무목표"
+  },
+  {
+   "goal_id": "g-2",
+   "term": "중기",
+   "name": "주거자금",
+   "due": "2032-11",
+   "amount_won": 250000000,
+   "amount_basis": "일시금",
+   "value_basis": "미확인",
+   "status": "기재",
+   "source_ref": "2. 재무목표"
+  },
+  {
+   "goal_id": "g-3",
+   "term": "장기",
+   "name": "은퇴 생활비",
+   "due": "60세",
+   "amount_won": 3000000,
+   "amount_basis": "월 생활비",
+   "value_basis": "미확인",
+   "source_ref": "2. 재무목표"
+  }
+ ]
+}

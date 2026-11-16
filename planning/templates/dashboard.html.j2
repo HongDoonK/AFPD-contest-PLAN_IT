@@ -1,0 +1,490 @@
+{% set c = p.customer %}
+{% set sm = s.summary %}
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>재무설계 검토 대시보드</title>
+<style>
+:root { --ink:#1d2530; --muted:#5d6876; --rule:#d8dde3; --strong:#1d2530; --paper:#fff; --warn:#8a4b08;
+        --short:{{ v.term_colors['단기'] }}; --mid:{{ v.term_colors['중기'] }}; --long:{{ v.term_colors['장기'] }}; }
+* { box-sizing:border-box; }
+html { scroll-padding-top:52px; }
+body { margin:0; background:var(--paper); color:var(--ink); font:14px/1.6 "Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif; }
+main { max-width:1100px; margin:0 auto; padding:28px 24px 64px; }
+header { border-bottom:2px solid var(--strong); padding-bottom:12px; }
+h1 { font-size:24px; margin:0 0 6px; letter-spacing:-.01em; }
+h2 { font-size:18px; margin:0 0 10px; padding-top:10px; border-top:2px solid var(--strong); }
+h3 { font-size:15px; margin:18px 0 8px; }
+h4 { font-size:14px; margin:0 0 4px; }
+p { margin:0 0 8px; }
+section { margin-top:32px; }
+.meta { color:var(--muted); margin:0; }
+.flags { margin-top:6px; display:flex; flex-wrap:wrap; gap:4px 16px; font-size:13px; }
+.flag { font-weight:700; }
+.flag.review { color:var(--warn); }
+nav.jump { position:sticky; top:0; z-index:5; background:var(--paper); border-bottom:1px solid var(--rule); padding:7px 0; display:flex; flex-wrap:wrap; gap:2px 14px; font-size:13px; }
+nav.jump a { color:var(--ink); text-decoration:none; }
+nav.jump a:hover { text-decoration:underline; }
+.note { color:var(--muted); font-size:12.5px; }
+.num { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+th { color:var(--muted); font-weight:600; text-align:left; border-bottom:1px solid var(--strong); padding:6px 8px; white-space:nowrap; }
+td { border-bottom:1px solid var(--rule); padding:6px 8px; vertical-align:top; }
+th.num { text-align:right; }
+tr.total td { font-weight:700; border-top:1px solid var(--strong); }
+.scroll { overflow-x:auto; }
+.kpis { display:grid; grid-template-columns:repeat(6,1fr); border-top:1px solid var(--rule); border-bottom:1px solid var(--rule); }
+.kpi { padding:12px 10px; border-right:1px solid var(--rule); }
+.kpi:last-child { border-right:none; }
+.kpi .k { color:var(--muted); font-size:12.5px; }
+.kpi .val { font-size:20px; font-weight:700; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.kpi .sub { color:var(--muted); font-size:12px; }
+.glance { margin-top:14px; }
+.glance-row { display:grid; grid-template-columns:110px 70px 80px 1fr 210px; gap:10px; align-items:center; padding:5px 0; border-bottom:1px solid var(--rule); font-size:13px; }
+.chip { display:inline-block; font-size:12px; font-weight:700; color:#fff; padding:0 7px; }
+.track { position:relative; height:16px; background:#eef0f3; }
+.fill { position:absolute; left:0; top:0; bottom:0; }
+.track .lbl { position:absolute; right:6px; top:-1px; font-size:12px; font-variant-numeric:tabular-nums; }
+.hbar { display:flex; height:28px; width:100%; }
+.hbar span { display:block; height:100%; border-right:2px solid #fff; }
+.legend { display:flex; flex-wrap:wrap; gap:4px 14px; font-size:12.5px; color:var(--muted); margin-top:5px; }
+.sw { display:inline-block; width:10px; height:10px; margin-right:4px; vertical-align:-1px; }
+.cf-row { display:grid; grid-template-columns:170px 1fr; gap:10px; padding:6px 0; border-bottom:1px solid var(--rule); font-size:13px; }
+.cf-bars div { display:flex; align-items:center; gap:6px; margin:2px 0; }
+.cf-bars i { display:block; height:14px; }
+.cf-bars b { font-weight:400; font-variant-numeric:tabular-nums; white-space:nowrap; font-size:12.5px; }
+.cols { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+ul { margin:0; padding-left:18px; }
+li { margin:2px 0; }
+.terms { display:grid; grid-template-columns:1fr; gap:0 22px; }
+.term { --tc:var(--ink); min-width:0; }
+.term-short { --tc:var(--short); } .term-mid { --tc:var(--mid); } .term-long { --tc:var(--long); }
+.term-head { display:flex; align-items:baseline; gap:10px; border-top:3px solid var(--tc); padding-top:8px; margin-top:20px; }
+.term-head h3 { margin:0; color:var(--tc); font-size:17px; }
+.narr { margin:6px 0 4px; font-size:13.5px; }
+.src { font-size:11.5px; color:var(--muted); }
+details.card { border-top:1px solid var(--rule); padding:8px 0; break-inside:avoid; page-break-inside:avoid; }
+details.card > summary { cursor:pointer; list-style:none; }
+details.card > summary::-webkit-details-marker { display:none; }
+.card-head { display:flex; gap:8px; align-items:baseline; flex-wrap:wrap; }
+.card-id { font-weight:700; color:var(--tc); }
+.card-title { font-weight:700; }
+.card-head::after { content:"펼치기"; margin-left:auto; font-size:11.5px; color:var(--muted); }
+details[open] .card-head::after { content:"접기"; }
+.cert { font-size:11.5px; border:1px solid var(--rule); padding:0 5px; color:var(--muted); white-space:nowrap; }
+.cert.c-calc { color:var(--ink); border-color:var(--ink); }
+.cert.c-check { color:var(--warn); border-color:var(--warn); }
+.action { margin:3px 0 4px; font-size:13.5px; }
+.keys { display:flex; flex-wrap:wrap; gap:2px 14px; font-size:12.5px; }
+.keys span { color:var(--muted); }
+.keys b { font-variant-numeric:tabular-nums; }
+.card-body { margin-top:8px; font-size:12.5px; }
+dl.nums { display:grid; grid-template-columns:1fr auto; gap:1px 12px; margin:0 0 8px; }
+dl.nums dt { color:var(--muted); }
+dl.nums dd { margin:0; text-align:right; font-variant-numeric:tabular-nums; }
+.charts { display:grid; grid-template-columns:1fr; gap:18px; margin-top:8px; }
+.chart { break-inside:avoid; page-break-inside:avoid; }
+.chart svg { display:block; width:100%; max-width:440px; height:auto; }
+svg text { font-family:inherit; }
+.small { font-size:12.5px; }
+.limitbar { display:grid; grid-template-columns:240px 1fr; gap:10px; align-items:center; font-size:12.5px; margin:6px 0; }
+@media (max-width:820px) { .limitbar { grid-template-columns:1fr; } }
+.pchip { font-size:11px; border:1px solid var(--rule); padding:0 4px; color:var(--muted); font-variant-numeric:tabular-nums; }
+.principles { font-size:12.5px; border-left:3px solid var(--tc); padding:4px 0 4px 10px; margin:8px 0; }
+.principles ul { margin-top:2px; }
+.stageband { display:flex; width:100%; min-height:44px; color:#fff; font-size:12.5px; }
+.stageband div { padding:5px 8px; border-right:2px solid #fff; overflow:hidden; }
+.stageband div:last-child { color:var(--ink); }
+.stageband b, .stageband span { display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+table.phase-many { font-size:11.5px; }
+table.phase-many th, table.phase-many td { padding:4px 5px; }
+.stageaxis { display:flex; width:100%; font-size:12px; color:var(--muted); margin:3px 0 10px; position:relative; }
+.stageaxis div { white-space:nowrap; }
+.stageaxis .end { position:absolute; right:0; }
+
+a { color:var(--mid); }
+.dec td:first-child { font-weight:600; }
+@media (min-width:820px) { .charts { grid-template-columns:1fr 1fr; } }
+@media (min-width:1100px) { .terms { grid-template-columns:repeat(3,1fr); } }
+@media (max-width:820px) {
+  .kpis { grid-template-columns:repeat(2,1fr); }
+  .kpi { border-bottom:1px solid var(--rule); }
+  .cols { grid-template-columns:1fr; }
+  .glance-row { grid-template-columns:1fr 1fr; }
+  .glance-row .track { grid-column:1 / -1; }
+  .cf-row { grid-template-columns:1fr; }
+  .stageaxis .end { display:none; }
+  main { padding:18px 14px 48px; }
+}
+@media print {
+  nav.jump { display:none; }
+  main { max-width:none; padding:0; }
+  .terms { grid-template-columns:1fr; }
+  .card-head::after { content:none; }
+  section, details.card, .chart, tr { break-inside:avoid; page-break-inside:avoid; }
+  a { color:var(--ink); }
+}
+</style>
+</head>
+<body>
+<main>
+<header id="head">
+  <h1>재무설계 검토 대시보드</h1>
+  <p class="meta">
+    {{ c.name or "고객" }} · 만 {{ c.age if c.age is not none else "미확인" }}세 · {{ c.occupation or "직업 미확인" }} ·
+    가구원 {{ c.household_size if c.household_size is not none else "미확인" }}명{% if c.marital_status %}({{ c.marital_status }}){% endif %} ·
+    {{ c.region_sido or "지역 미확인" }}{% if c.region_sigungu %} {{ c.region_sigungu }}{% endif %} · 기준일 {{ c.as_of }}
+  </p>
+  <div class="flags">
+    <span class="flag">정책 반영 범위: {{ v.scenario_label }}</span>
+    <span class="flag review">상태: {{ p.review.state }}</span>
+    {% if c.is_synthetic %}<span class="flag">가상 고객 자료</span>{% endif %}
+    <span>자산·현금흐름 입력: {{ v.input_source }}</span>
+    <span>투자성향: {{ s.risk_profile }}</span>
+    <span>금액 단위: 만원</span>
+    <span>작성: {{ p.generated_at }}</span>
+  </div>
+</header>
+<nav class="jump" aria-label="절 이동">
+  <a href="#kpi">핵심 지표</a><a href="#goals">재무목표</a><a href="#allocation">분배·수익률</a><a href="#phases">단계별 비율</a><a href="#assets">자산 배정</a>
+  <a href="#retire">노후 운용</a><a href="#strategy">전략</a><a href="#projections">목표별 전망</a><a href="#decisions">판단 사항</a>
+  <a href="#cashflow">현금흐름</a><a href="#options">대안·정책</a><a href="#appendix">가정·기록</a>
+</nav>
+
+<section id="kpi">
+  <h2>핵심 지표</h2>
+  <div class="kpis">
+    <div class="kpi"><div class="k">금융자산(M)</div><div class="val">{{ sm.M | man }}</div><div class="sub">즉시 인출 {{ sm.liquid_now | man }}</div>{% if s.allocation.earmarked %}<div class="sub">용도 지정 {{ s.allocation.earmarked | man }}만원 제외</div>{% endif %}</div>
+    <div class="kpi"><div class="k">보존자산(p+q+r+s)</div><div class="val">{{ sm.locked | man }}</div><div class="sub">청약·IRP·연금저축·변액</div></div>
+    <div class="kpi"><div class="k">부채</div><div class="val">{{ sm.debt | man }}</div><div class="sub">순자산 {{ sm.net_worth | man }}</div></div>
+    <div class="kpi"><div class="k">월 잉여현금</div><div class="val">{{ sm.surplus_before | man }} → {{ sm.surplus_after | man }}</div><div class="sub">정책 반영 전 → 후</div></div>
+    <div class="kpi"><div class="k">목표 월 필요액</div><div class="val">{{ sm.monthly_need | man }}</div><div class="sub">하한~상한 수익률 {{ v.need_by.low | man }}~{{ v.need_by.high | man }}</div>{% if v.phase2 %}<div class="sub">양육 전환 뒤 {{ v.phase2.monthly_need_by_rate.base | man }}</div>{% endif %}</div>
+    <div class="kpi"><div class="k">월 부족액(기준 수익률)</div><div class="val">{{ sm.monthly_shortfall | man }}</div><div class="sub">하한~상한 수익률 {{ v.short_by.low | man }}~{{ v.short_by.high | man }}</div>{% if v.phase2 %}<div class="sub">양육 전환 뒤 {{ v.phase2.monthly_shortfall_by_rate.base | man }}</div>{% endif %}</div>
+  </div>
+  {% if p.advice.summary %}<p class="narr" style="margin-top:10px">{{ p.advice.summary.text }} <span class="src">[{{ "AI 다듬음" if p.advice.summary.source == "llm" else "템플릿 문장" }}]</span></p>{% endif %}
+</section>
+
+<section id="goals">
+  <h2>고객 재무목표</h2>
+  {% if v.goals_table %}
+  <div class="scroll"><table>
+    <thead><tr><th>필요시기</th><th>재무목표(고객 표기)</th><th>시점</th><th class="num">금액</th><th>계획 반영</th><th class="num">통계 참고값</th></tr></thead>
+    <tbody>{% for r in v.goals_table %}<tr><td>{{ r.term }}</td><td>{{ r.text }}</td><td>{{ r.due }}</td><td class="num">{{ r.amount }}</td><td>{{ r.use }}</td><td class="num">{{ (r.reference | manu) if r.reference is not none else "" }}</td></tr>{% endfor %}</tbody>
+  </table></div>
+  {% else %}<p class="note">4대 생애목표 통계 기준으로 계산(고객 재무목표 표 없음).</p>{% endif %}
+  <p class="note">기본 목표: {% for g in v.bases %}{{ g.name }}({{ g.need_source or "통계값" }}, {{ g.target }}){% if not loop.last %} · {% endif %}{% endfor %}.</p>
+  {% if v.extras %}<p class="note">추가 목표(고객이 더 적은 것): {% for g in v.extras %}{{ g.name }}{% if g.label %}({{ g.label }}){% endif %} {{ g.need | manu }}, {{ g.target }}{% if g.recurrence == "annual" %}, 매년 반복 월 {{ g.recurring_monthly | man }}{% endif %}{% if not loop.last %} · {% endif %}{% endfor %}.</p>{% endif %}
+  <p class="note">목표 기준: {{ v.goal_basis_label }}.{% if s.allocation.emergency.source == "고객 목표" %} 비상금은 고객이 적은 목표 {{ s.allocation.emergency.customer_amount | manu }}(월 소득 기준 {{ s.allocation.emergency.income_rule_amount | manu }}).{% endif %}</p>
+</section>
+
+<section id="allocation">
+  <h2>목표별 분배와 수익률 가정</h2>
+  {% if v.ratio_bar %}
+  <div class="hbar" role="img" aria-label="분배 비율">{% for b in v.ratio_bar %}<span style="width:{{ b.pct }}%;background:{{ b.color }}"></span>{% endfor %}</div>
+  <div class="legend">{% for b in v.ratio_bar %}<span><i class="sw" style="background:{{ b.color }}"></i>{{ b.label }} {{ b.value }}%</span>{% endfor %}</div>
+  {% else %}<p class="note">분배 비율 없음: {{ s.allocation.no_ratio_reason }}</p>{% endif %}
+  <p class="note">분배 대상(D) {{ s.allocation.distributable | manu }} = 금융자산(M){% if s.allocation.earmarked %} {{ sm.M | manu }} − 용도 지정(납세 등) {{ s.allocation.earmarked | manu }} = {{ s.allocation.m_avail | manu }}{% else %} {{ s.allocation.m_avail | manu }}{% endif %} − 비상금 {{ s.allocation.emergency.amount | manu }}{% if s.allocation.emergency.months %}(소득 불규칙: 월 지출 {{ s.allocation.emergency.monthly_spending | manu }} × {{ s.allocation.emergency.months }}개월){% endif %}. 비율은 부족분 ÷ 남은 기간의 비중. 분배 단계(수익률 미반영) 월 부족 {{ v.shortfall_simple | manu }}.</p>
+  <div class="scroll"><table>
+    <thead><tr><th>목표</th><th>구분</th><th>기간</th><th class="num">필요자금</th><th class="num">비율</th><th class="num">배정액</th><th class="num">계획 월 적립</th><th>적용 수익률(명목)</th><th>위험:안전</th><th>충족률 하한~상한</th></tr></thead>
+    <tbody>
+    {% for g in v.alloc_rows %}
+      {% if g.inactive %}
+      <tr><td>{{ g.name }}</td><td>{{ "추가" if g.kind == "extra" else "기본" }}</td><td colspan="8" class="note">{{ g.note or "분배 제외" }}</td></tr>
+      {% else %}
+      <tr><td style="white-space:nowrap"><i class="sw" style="background:{{ g.color }}"></i>{{ g.name }}{% if g.kind == "extra" and g.label %} <span class="note">({{ g.label }})</span>{% endif %}</td>
+        <td>{{ "추가" if g.kind == "extra" else "기본" }}{% if g.recurrence == "annual" %} · 매년 반복(월 {{ g.recurring_monthly | man }}){% endif %}</td>
+        <td>{{ g.term }} · {{ g.target }}{% if g.term_note %} <span class="note">(남은 기간 기준 {{ g.term_rule }})</span>{% endif %}</td>
+        <td class="num">{% if g.ends_at_transition %}전환 대상{% else %}{{ g.need | man }}<br><span class="note">{{ g.need_source }}</span>{% endif %}</td>
+        <td class="num">{{ (g.ratio ~ "%") if g.ratio is not none else "" }}</td>
+        <td class="num">{{ g.allocated | man }}</td>
+        <td class="num">{{ g.planned_monthly | man }}{% if not g.ends_at_transition %}<br><span class="note">필요 {{ g.required_monthly | man }}</span>{% else %}<br><span class="note">{{ g.target }}까지</span>{% endif %}</td>
+        <td class="small">{{ g.rate_text }}</td>
+        <td>{{ g.risk_now or "" }}</td>
+        <td style="min-width:150px">{% if g.ends_at_transition %}전환 대상<br><span class="note">전환 시점({{ g.transition.date }}) 준비금 {{ g.transition.reserve.base | manu }}(월 양육비 {{ g.transition.reserve_months }}개월분)</span>{% else %}<div class="track"><div class="fill" style="left:{{ g.bar_low }}%;width:{{ [g.bar_high - g.bar_low, 0.6] | max }}%;background:{{ g.color }};opacity:.35"></div><div class="fill" style="width:{{ g.bar }}%;background:{{ g.color }};height:5px;top:5px"></div></div>
+          <span class="note">{{ g.coverage_low | ratio_pct }} ~ {{ g.coverage_high | ratio_pct }}, 기준 {{ g.coverage | ratio_pct }}</span>{% endif %}</td></tr>
+      {% endif %}
+    {% endfor %}
+    </tbody>
+  </table></div>
+  <p class="note">수익률은 사용자 지정 가정(연 명목)이며 보장값이 아닙니다. {% for t in v.rate_notes %}{{ t }}{% if not loop.last %}; {% endif %}{% endfor %}. 투자성향은 계산에 쓰지 않았습니다.</p>
+</section>
+
+<section id="phases">
+  <h2>단계별 비율 변화</h2>
+  {% if v.transition %}
+  {% set ti = v.transition.info %}
+  <p class="note">목표 달성·목표 시점 도래·양육 전환·자녀 19세가 올 때마다 남은 목표만으로 같은 공식(부족분 ÷ 남은 기간)의 비율을 다시 계산합니다. 사건 시점은 기준 수익률 경로로 정하고, 같은 단계별 월 적립을 하한·상한 경로에도 적용했습니다.</p>
+  <div class="stageband" role="img" aria-label="단계">{% for b in v.transition.bands %}<div style="width:{{ b.pct }}%;background:{{ ['#2d5b94', '#a4462b', '#3a7350', '#5d6876', '#7b8794', '#8a6d3b', '#4b6a8a', '#6b4a6f'][loop.index0 % 8] }}"><b>{{ b.name }}</b><span>{{ b.label }}</span><span>잉여 {{ b.surplus | man }}</span></div>{% endfor %}</div>
+  <div class="stageaxis">{% for b in v.transition.bands %}<div style="width:{{ b.pct }}%">{{ b.start }}</div>{% endfor %}</div>
+  <div class="scroll"><table class="{{ 'phase-many' if v.transition.many else '' }}">
+    <thead><tr><th>목표</th>{% for b in v.transition.bands %}<th class="num">{{ b.name }}<br><span class="note">{{ b.start }} · {{ b.label }}</span></th>{% endfor %}</tr></thead>
+    <tbody>
+      <tr><td>월 잉여</td>{% for b in v.transition.bands %}<td class="num">{{ b.surplus | man }}{% if b.child_cost %}<br><span class="note">양육비 {{ b.child_cost | man }} 차감</span>{% endif %}{% if b.unassigned %}<br><span class="note">미배정 여유</span>{% endif %}</td>{% endfor %}</tr>
+      {% for r in v.transition.rows %}<tr><td>{{ r.name }}</td>{% for c in r.cells %}<td class="num">{{ c.text }}{% if c.sub %}<br><span class="note">{{ c.sub }}</span>{% endif %}</td>{% endfor %}</tr>{% endfor %}
+    </tbody>
+  </table></div>
+  <p class="note">칸마다 비율과 그 아래 월 적립(만원). 적립 완료는 그 달 잔액을 적립 없이 목표 시점까지 굴려도 필요자금에 닿는 첫 달이며, 그 뒤 적립 0으로 남은 목표에 비율을 다시 나눕니다.</p>
+  {% if ti %}
+  <p class="note">양육 전환 {{ ti.date }}({{ ti.source }}): 월 양육비 {{ ti.child_cost.monthly | manu }}을 변동지출로 처리. 산정: {{ ti.child_cost.basis }}. 출처: {{ ti.child_cost.source }}(일부 값만 대조, 법원 원문 표로 전체 대조 필요). 배우자 소득을 알면 구간이 올라갈 수 있습니다.</p>
+  <p class="note">양육 준비금: 전환 시점 {{ ti.reserve.low | man }} ~ {{ ti.reserve.high | man }}만원(기준 {{ ti.reserve.base | man }}, 월 양육비 {{ ti.reserve_months }}개월분). 다른 목표로 옮기지 않고 남겨 두며 처리 방식은 판단 사항에서 정합니다.</p>
+  {% elif v.child_note %}<p class="note">{{ v.child_note }}.</p>{% endif %}
+  {% endif %}
+</section>
+
+<section id="assets">
+  <h2>자산 배정</h2>
+  <div class="hbar" role="img" aria-label="자산 구성">{% for b in v.assets %}<span style="width:{{ b.pct }}%;background:{{ b.color }}"></span>{% endfor %}</div>
+  <div class="legend">{% for b in v.assets %}<span><i class="sw" style="background:{{ b.color }}"></i>{{ b.label }} {{ b.value | man }}({{ b.share | ratio_pct }})</span>{% endfor %}</div>
+  <p class="note" style="margin-top:8px">배정 규칙: {{ s.asset_mapping.rule }}. 안전 자산 {{ s.asset_mapping.safe_total | manu }}, 투자 자산 {{ s.asset_mapping.invest_total | manu }}{% if s.asset_mapping.earmarked_total %}, 용도 지정(납세 등) {{ s.asset_mapping.earmarked_total | manu }}은 어떤 목표에도 배정하지 않음{% endif %}.</p>
+  <div class="scroll"><table>
+    <thead><tr><th>자산</th><th>구분</th><th class="num">잔액</th><th>만기</th>
+      {% for col in v.asset_cols %}<th class="num">{{ v.goal_names.get(col.key, col.name) }}</th>{% endfor %}<th class="num">기존 보존자산</th></tr></thead>
+    <tbody>
+    {% for r in v.asset_rows %}
+      <tr><td>{{ r.asset }}{% if r.earmark %} <span class="note">(용도: {{ r.earmark }})</span>{% endif %}{% if not r.balance_known %} <span class="note">잔액 미확인</span>{% endif %}</td>
+        <td>{{ r.class }}</td><td class="num">{{ r.balance | man }}</td><td>{{ r.matures_on or r.liquidity or "" }}</td>
+        {% for cell in r.cells %}<td class="num">{% if cell.v is not none %}{{ cell.v | man }}{% endif %}{% if cell.conv is not none %}<br><span class="note">전환 후 배정 {{ cell.conv | man }}</span>{% endif %}</td>{% endfor %}<td></td></tr>
+    {% endfor %}
+    {% for r in v.locked_rows %}
+      <tr><td>{{ r.asset }} <span class="note">({{ r.goal_name }} 재원{% if r.annual %}, 연 납입 {{ r.annual | man }}{% endif %})</span></td><td>보존</td><td class="num">{{ r.balance | man }}</td><td>해지 시 손실</td>
+        {% for cell in r.cells %}<td></td>{% endfor %}<td class="num">{{ r.balance | man }}</td></tr>
+    {% endfor %}
+      <tr class="total"><td>금융자산(M) 합계</td><td></td><td class="num">{{ s.asset_mapping.total | man }}</td><td></td>
+        {% for col in v.asset_cols %}<td class="num">{{ s.asset_mapping.totals[col.key] | man }}</td>{% endfor %}<td></td></tr>
+      {% if v.locked_rows %}<tr class="total"><td>보존자산 합계</td><td></td><td class="num">{{ s.asset_mapping.locked_total | man }}</td><td></td>
+        {% for col in v.asset_cols %}<td class="num">{{ (s.asset_mapping.locked_totals[col.key] | man) if col.key in s.asset_mapping.locked_totals else "" }}</td>{% endfor %}<td class="num">{{ s.asset_mapping.locked_total | man }}</td></tr>{% endif %}
+    </tbody>
+  </table></div>
+  {% if s.asset_mapping.unfilled %}<p class="note">자산으로 채우지 못한 배정: {% for k, val in s.asset_mapping.unfilled.items() %}{{ v.goal_names.get(k, k) }} {{ val | manu }}{% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+  {% if s.asset_mapping.rebalance %}
+  <h3>전환 필요</h3>
+  <ul>{% for x in s.asset_mapping.rebalance %}<li>{{ x.text }}</li>{% endfor %}</ul>
+  {% else %}<p class="note">전환 필요 없음: 비상금과 3년 안 목표를 안전 자산으로 채움.</p>{% endif %}
+  <p class="note">적용 원칙: {% for pid in s.principles.asset_mapping %}{% if pid in v.guide %}{{ pid }} {{ v.guide[pid].title }}{% if not loop.last %} · {% endif %}{% endif %}{% endfor %}</p>
+</section>
+
+<section id="retire">
+  <h2>노후 단계별 운용</h2>
+  {% if v.retire %}
+  {% set rg = v.retire %}
+  <div class="stageband" role="img" aria-label="노후 단계">{% for b in v.retire_band %}<div style="width:{{ b.pct }}%;background:{{ b.color }}"><b>{{ b.stage }} {{ b.risk_ratio or "" }}</b><span>{{ b.rate_text }}</span></div>{% endfor %}</div>
+  <div class="stageaxis">{% for b in v.retire_band %}<div style="width:{{ b.pct }}%">{{ b.start[:4] }}년{% if b.start_age is not none %} · {{ b.start_age | round(0) | int }}세{% endif %}</div>{% endfor %}<div class="end">{{ v.retire_band[-1].end[:4] }}년{% if v.retire_band[-1].end_age is not none %} · {{ v.retire_band[-1].end_age | round(0) | int }}세{% endif %}</div></div>
+  <div class="scroll"><table>
+    <thead><tr><th>단계</th><th>기간</th><th>나이</th><th>위험:안전</th><th>연 명목 수익률</th><th class="num">단계 말 예상 잔액(하한 · 기준 · 상한)</th></tr></thead>
+    <tbody>{% for b in v.retire_band %}<tr><td>{{ b.stage }}</td><td>{{ b.start }} ~ {{ b.end }} ({{ b.years }}년)</td><td>{% if b.start_age is not none %}{{ b.start_age }} ~ {{ b.end_age }}세{% endif %}</td><td>{{ b.risk_ratio }}</td><td>{{ b.rate_text }}(기준 {{ b.nominal.base }}%, 실질 {{ b.real_base }}%)</td><td class="num">{{ b.end_balance.low | man }} · {{ b.end_balance.base | man }} · {{ b.end_balance.high | man }}</td></tr>{% endfor %}</tbody>
+  </table></div>
+  <p class="note">노후 재원 = 분배액 {{ rg.allocated | manu }} + 보존자산(연금저축·IRP·변액) {{ rg.existing_locked | manu }}, 계획 월 적립 {{ rg.planned_monthly | manu }}(기존 연금 납입 {{ rg.committed_monthly | man }} + 신규 {{ rg.new_monthly | man }}). 필요자금 {{ rg.need | manu }}, 은퇴 시점 충족률 {{ rg.coverage_low | ratio_pct }} ~ {{ rg.coverage_high | ratio_pct }}(기준 {{ rg.coverage | ratio_pct }}). 연금 계좌 안의 운용 비중을 현재 단계에 맞춰 점검하고 세액공제(L1)와 함께 봅니다.</p>
+  <p class="note">25~20년 구간은 70:30으로 처리(확인 필요). 단계 수익률은 사용자 지정 가정이며 보장값이 아닙니다.</p>
+  {% if v.retire_tax %}{% set rt = v.retire_tax %}
+  <h3 id="retire-tax">노후 재원 계좌 배분과 수령 세금 구간</h3>
+  <p class="note">은퇴 뒤 연 필요 인출액 {{ rt.annual_need | manu }}(수령 기간 {{ rt.period_years }}년). 적격 계좌 목표 잔액 상한 = 연 1,500만원 × {{ rt.period_years }}년 = {{ rt.qualified_cap | manu }}(은퇴 뒤 운용 수익 0으로 보는 보수적 계산). 필요자금 {{ rt.need | manu }} 중 적격 {{ rt.target_qualified | manu }}, 비적격 {{ rt.target_nonqualified | manu }}(연 {{ rt.nonqualified_annual | man }}만원 수령).</p>
+  <div class="scroll"><table>
+    <thead><tr><th>계좌</th><th class="num">지금 잔액</th>{% for x in rt.by_phase %}<th class="num">{{ x.start }}<br><span class="note">월 납입</span></th>{% endfor %}<th class="num">은퇴 시점 잔액</th><th class="num">은퇴 뒤 연 수령</th><th>한도</th><th>판정</th></tr></thead>
+    <tbody>{% for x in rt.accounts %}<tr><td>{{ x.name }}</td><td class="num">{{ x.start_balance | man }}</td>{% for y in x.monthly_by_phase %}<td class="num">{{ y.monthly | man }}</td>{% endfor %}<td class="num">{{ x.balance_at_retire | man }}</td><td class="num">{{ x.annual_withdrawal | man }}</td><td class="note">{{ x.limit }}</td><td>{{ x.verdict }}</td></tr>{% endfor %}
+      <tr class="total"><td>합계(노후 월 적립)</td><td></td>{% for x in rt.by_phase %}<td class="num">{{ x.total | man }}</td>{% endfor %}<td></td><td></td><td></td><td></td></tr></tbody>
+  </table></div>
+  {% set qv = rt.qualified_annual_vs_limit %}{% set gv = rt.general_interest_vs_limit %}
+  <div class="limitbar"><span>적격 계좌 연 수령 {{ qv.value | man }} / 1,500</span><div class="track"><div class="fill" style="width:{{ [qv.value / qv.limit * 100, 100] | min }}%;background:#3a7350"></div></div></div>
+  <div class="limitbar"><span>일반 계좌 이자·배당 {{ gv.value | man }} / 2,000</span><div class="track"><div class="fill" style="width:{{ [gv.value / gv.limit * 100, 100] | min }}%;background:#2d5b94"></div></div></div>
+  {% if v.extra_retire %}<p class="note">추가 노후 재원: {{ v.extra_retire.start }}부터 남는 잉여를 쌓아 은퇴 시점 {{ v.extra_retire.balance.base | manu }}(같은 계좌 배분 규칙).</p>{% endif %}
+  <p class="note">제도값(사적연금 1,500만원 분리과세, 금융소득 2,000만원, 연금계좌 납입·공제 한도, 저축성 보험 비과세 요건)은 원문 확인 필요. 한도는 명목 고정이라 실제로는 더 빨리 닿을 수 있습니다. 검토 제안이며 세무 자문이 아닙니다.</p>
+  {% endif %}
+  {% else %}<p class="note">노후 목표 없음.</p>{% endif %}
+</section>
+
+<section id="strategy">
+  <h2>단기·중기·장기 전략</h2>
+  <p class="note">{{ s.terms_rule }}. 카드는 검토 제안이며 판정이 아닙니다. 카드를 누르면 숫자 표·산식·근거·확인할 것이 열립니다. 원칙 번호는 팀 예시 보고서에서 간추린 전략 원칙입니다.</p>
+  <div class="terms">
+  {% for t in v.terms %}
+  <div class="term term-{{ t.cls }}" id="term-{{ t.term }}">
+    <div class="term-head"><h3>{{ t.term }}</h3><span class="src">카드 {{ t.cards | length }}개 · {{ "AI가 정한 순서" if t.advice.order_source == "llm" else "엔진 우선순위 순" }}</span></div>
+    {% if t.principles %}
+    <div class="principles"><strong>적용 원칙</strong>{% if t.advice.principles_source == "llm" %} <span class="src">[AI가 후보에서 고름]</span>{% endif %}
+      <ul>{% for pr in t.principles %}<li><b>{{ pr.id }} {{ pr.title }}</b>: {{ pr.text }}</li>{% endfor %}</ul></div>
+    {% endif %}
+    {% if t.advice %}
+    <p class="narr"><strong>{{ t.advice.focus }}</strong></p>
+    <p class="narr">{{ t.advice.narrative }} <span class="src">[{{ "AI 다듬음" if t.advice.source == "llm" else "템플릿 문장" }}]</span></p>
+    {% endif %}
+    {% for card in t.cards %}
+    <details class="card">
+      <summary>
+        <div class="card-head"><span class="card-id">{{ card.id }}</span><span class="card-title">{{ card.title }}</span><span class="cert {{ card.cert_class }}">{{ card.certainty }}</span>{% for pid in card.principles %}<span class="pchip">{{ pid }}</span>{% endfor %}</div>
+        <p class="action">{{ card.action }}</p>
+        <div class="keys">{% for k in card.key_numbers %}<span>{{ k.label }} <b>{{ k.value }}</b></span>{% endfor %}</div>
+      </summary>
+      <div class="card-body">
+        <dl class="nums">{% for n in card.all_numbers %}<dt>{{ n.label }}</dt><dd>{{ n.value }}</dd>{% endfor %}</dl>
+        {% if card.table %}
+        <div class="scroll"><table>
+          <thead><tr>{% for h in card.table.head %}<th>{{ h }}</th>{% endfor %}</tr></thead>
+          <tbody>{% for row in card.table.body %}<tr>{% for cell in row %}<td>{% if cell.link is defined %}{% if cell.link %}<a href="{{ cell.link }}">바로가기</a>{% endif %}{% else %}{{ cell.text }}{% endif %}</td>{% endfor %}</tr>{% endfor %}</tbody>
+        </table></div>
+        {% endif %}
+        {% if card.glide_text %}<p>운용 구간: {{ card.glide_text }}</p>{% endif %}
+        <p><strong>산식</strong> {{ card.basis }}</p>
+        {% if card.confirm %}<p><strong>확인할 것</strong></p><ul>{% for x in card.confirm %}<li>{{ x }}</li>{% endfor %}</ul>{% endif %}
+        <p style="margin-top:6px"><strong>근거</strong></p>
+        <ul>{% for e in card.evidence_view %}<li>{% if e.href %}<a href="{{ e.href }}">{{ e.label }}</a>{% else %}{{ e.label }}{% endif %}</li>{% endfor %}
+          {% for pid in card.principles %}{% if pid in v.guide %}<li>원칙 {{ pid }} {{ v.guide[pid].title }}</li>{% endif %}{% endfor %}</ul>
+      </div>
+    </details>
+    {% endfor %}
+  </div>
+  {% endfor %}
+  </div>
+</section>
+
+<section id="projections">
+  <h2>목표별 전망</h2>
+  <p class="note">오늘 가치 기준. 굵은 선은 기준 수익률, 옅은 띠는 하한~상한 수익률 범위, 검은 파선은 필요자금입니다.</p>
+  <div class="charts">
+    {% for g in v.charts %}{% set ch = g.chart %}
+    <div class="chart">
+      <h4><span class="chip" style="background:{{ g.color }}">{{ g.term }}</span> {{ g.name }} ({{ ("전환 " ~ g.target ~ "까지 준비금") if g.ends_at_transition else ("목표 " ~ g.target) }})</h4>
+      <svg viewBox="0 0 {{ ch.w }} {{ ch.h }}" width="{{ ch.w }}" height="{{ ch.h }}" role="img" aria-label="{{ g.name }} 전망">
+        {% for tk in ch.yticks %}<line x1="{{ ch.pad_l }}" x2="{{ ch.x_end }}" y1="{{ tk.y }}" y2="{{ tk.y }}" stroke="#e4e7eb"></line>
+        <text x="{{ ch.pad_l - 6 }}" y="{{ tk.y + 4 }}" font-size="13" text-anchor="end" fill="#5d6876">{{ tk.label }}</text>{% endfor %}
+        {% for tk in ch.xticks %}<text x="{{ tk.x }}" y="{{ ch.y_base + 19 }}" font-size="13" text-anchor="{{ 'end' if loop.last else 'middle' }}" fill="#5d6876">{{ tk.label }}</text>{% endfor %}
+        <polygon points="{{ ch.band }}" fill="{{ g.color }}" fill-opacity="0.18" stroke="none"></polygon>
+        {% if ch.need_y is not none %}<line x1="{{ ch.pad_l }}" x2="{{ ch.x_end }}" y1="{{ ch.need_y }}" y2="{{ ch.need_y }}" stroke="#1d2530" stroke-width="1.3" stroke-dasharray="6 4"></line>
+        <text x="{{ ch.x_end }}" y="{{ ch.need_label_y }}" font-size="13" text-anchor="end" fill="#1d2530">{{ ch.need_label }}</text>{% endif %}
+        <polyline points="{{ ch.base }}" fill="none" stroke="{{ g.color }}" stroke-width="3"></polyline>
+      </svg>
+      {% if g.ends_at_transition %}
+      <div class="legend"><span><i class="sw" style="background:{{ g.color }}"></i>준비금 기준 {{ g.fv_base | man }}</span><span><i class="sw" style="background:{{ g.color }};opacity:.3"></i>하한~상한 {{ g.fv_low | man }}~{{ g.fv_high | man }}</span></div>
+      <p class="note">전환 시점({{ g.transition.date }}) 준비금 {{ g.transition.reserve.base | manu }}(월 양육비 {{ g.transition.reserve_months }}개월분). 계획 월 적립 {{ g.planned_monthly | manu }}을 전환 시점까지 모으고, 그 뒤 양육비는 변동지출로 처리합니다. 마지막 구간은 1년이 안 되는 기간입니다.</p>
+      {% else %}
+      <div class="legend"><span><i class="sw" style="background:{{ g.color }}"></i>기준 {{ g.fv_base | man }}</span><span><i class="sw" style="background:{{ g.color }};opacity:.3"></i>하한~상한 {{ g.fv_low | man }}~{{ g.fv_high | man }}</span><span><i class="sw" style="background:#1d2530"></i>필요자금 {{ g.need | man }}</span></div>
+      <p class="note">계획 월 적립 {{ g.planned_monthly | manu }}(기존 납입 {{ g.committed_monthly | man }} + 신규 {{ g.new_monthly | man }}) · 필요 월 적립 {{ g.required_monthly | manu }}(하한 수익률 {{ g.required_monthly_low | man }}) · 충족률 {{ g.coverage_low | ratio_pct }}~{{ g.coverage_high | ratio_pct }} · {% if g.achieved_month %}적립 완료 {{ g.achieved_month }}(목표 시점에 필요자금 도달 예상){% else %}목표 시점 부족 {{ g.shortfall_at_due.base | manu }}{% endif %}</p>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section id="decisions">
+  <h2>설계사 판단 사항</h2>
+  <div class="scroll"><table class="dec">
+    <thead><tr><th>사항</th><th>내용</th><th>선택지</th></tr></thead>
+    <tbody>
+    {% for d in s.decisions %}
+      <tr><td>{{ d.topic }}</td><td>{{ d.detail }}</td><td>{{ d.options | join(" / ") }}</td></tr>
+    {% else %}
+      <tr><td colspan="3">판단할 사항 없음</td></tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  <p class="note">적용 원칙: {% for pid in s.principles.decisions %}{% if pid in v.guide %}{{ pid }} {{ v.guide[pid].title }}{% endif %}{% endfor %}</p>
+  <div class="cols" style="margin-top:14px">
+    <div>
+      <h3>받을 자료</h3>
+      <ul class="note">{% for d in s.data_requests %}<li>{{ d.item }}: {{ d.reason }}</li>{% else %}<li>없음</li>{% endfor %}</ul>
+      <h3>경고</h3>
+      <ul class="note">{% for w in s.warnings %}<li>{{ w }}</li>{% else %}<li>없음</li>{% endfor %}</ul>
+    </div>
+    <div>
+      <h3>고객에게 물을 것</h3>
+      <ul class="note">{% for q in v.questions %}<li>{{ q }}</li>{% else %}<li>없음</li>{% endfor %}</ul>
+    </div>
+  </div>
+</section>
+
+<section id="cashflow">
+  <h2>현금흐름(월, 만원)</h2>
+  {% for r in v.cashflow %}
+  <div class="cf-row">
+    <div>{{ r.label }}</div>
+    <div class="cf-bars">
+      <div><i style="width:{{ r.wb }}%;background:#b7bfc9"></i><b>{{ r.before | man }}</b></div>
+      <div><i style="width:{{ r.wa }}%;background:#3b4552"></i><b>{{ r.after | man }}{% if r.delta %} ({{ "+" if r.delta > 0 else "" }}{{ r.delta | man }}){% endif %}</b></div>
+      {% if r.p2 is not none %}<div><i style="width:{{ r.wp2 }}%;background:#a4462b"></i><b>{{ r.p2 | man }}</b></div>{% endif %}
+    </div>
+  </div>
+  {% endfor %}
+  <div class="legend"><span><i class="sw" style="background:#b7bfc9"></i>정책 반영 전(행동 절감 후)</span><span><i class="sw" style="background:#3b4552"></i>정책 반영 후</span>{% if v.phase2 %}<span><i class="sw" style="background:#a4462b"></i>양육 전환 뒤(월 양육비 {{ v.phase2.child_cost | man }} 변동지출 추가)</span>{% endif %}</div>
+  <h3>절감 내역</h3>
+  <div class="scroll"><table>
+    <thead><tr><th>구분</th><th>항목·정책</th><th class="num">월 절감</th><th>판정</th><th>공고</th></tr></thead>
+    <tbody>
+      <tr><td>행동 절감</td><td>소비 습관 조정(고객 동의 전)</td><td class="num">{{ v.behavior_cut | man }}</td><td></td><td></td></tr>
+      {% for a in p.policy.applied %}
+      <tr><td>정책 절감</td><td>{{ a.item }} · {{ a.policy_name }}</td><td class="num">{{ a.monthly_saving | man }}</td><td>{{ a.verdict }}</td><td>{% if a.url %}<a href="{{ a.url | href }}">바로가기</a>{% endif %}</td></tr>
+      {% else %}
+      <tr><td>정책 절감</td><td>반영한 정책 없음</td><td class="num">0</td><td></td><td></td></tr>
+      {% endfor %}
+      <tr class="total"><td>정책 절감 합</td><td>변동 {{ v.policy_cut.variable | man }} · 고정 {{ v.policy_cut.fixed | man }}</td><td class="num">{{ ((v.policy_cut.variable or 0) + (v.policy_cut.fixed or 0)) | man }}</td><td></td><td></td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">소비 보고서 기준 정책 혜택 월 {{ (p.spending.effect.policy_monthly_won / 10000) | man }}, 소비 조정 월 {{ (p.spending.effect.adjustment_monthly_won / 10000) | man }}. {% if v.other_scenario_label %}다른 반영 범위({{ v.other_scenario_label }})의 연 잉여는 {{ p.policy.other_scenario.deltaM | man }}.{% endif %}</p>
+</section>
+<section id="options">
+  <h2>대안 비교: 비율 배분과 시점순 집중</h2>
+  <p class="note">월 {{ s.options.monthly_total | manu }}을 쓰는 두 방식. 비율 배분: {{ s.options.ratio.rule }}. 시점순 집중: {{ s.options.sequential.rule }}. {{ s.options.note }}.</p>
+  <div class="scroll"><table>
+    <thead><tr><th>목표</th><th>목표 시점</th><th>비율 배분 결과</th><th>시점 안</th><th>시점순 집중 달성</th><th>시점 안</th></tr></thead>
+    <tbody>
+    {% for r in s.options.rows %}
+      <tr><td>{{ r.name }}</td><td>{{ r.target }}</td><td>{% if r.ratio_month %}적립 완료 {{ r.ratio_month }}{% else %}목표 시점 부족 {{ r.ratio_shortfall | manu }}{% endif %}</td><td>{{ "예" if r.ratio_on_time else ("아니오" if r.ratio_on_time is not none else "") }}</td>
+        <td>{{ r.sequential_month or "60년 안 어려움" }}</td><td>{{ "예" if r.sequential_on_time else ("아니오" if r.sequential_on_time is not none else "") }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  <p class="note">적용 원칙: {% for pid in s.principles.options %}{% if pid in v.guide %}{{ pid }} {{ v.guide[pid].title }}{% endif %}{% endfor %}</p>
+</section>
+
+<section id="policy">
+  <h2>정책</h2>
+  <p class="note">정책 DB 기준일 {{ p.policy.policy_db_as_of }}. {{ p.policy.disclaimer }}</p>
+  <h3>반영한 정책</h3>
+  <div class="scroll"><table>
+    <thead><tr><th>항목</th><th>정책</th><th>판정</th><th class="num">월 절감</th><th class="num">연 효과</th><th>공고</th></tr></thead>
+    <tbody>
+    {% for a in p.policy.applied %}<tr><td>{{ a.item }}</td><td>{{ a.policy_name }}</td><td>{{ a.verdict }}</td><td class="num">{{ a.monthly_saving | man }}</td><td class="num">{{ a.annual_saving | man }}</td><td>{% if a.url %}<a href="{{ a.url | href }}">바로가기</a>{% endif %}</td></tr>
+    {% else %}<tr><td colspan="6">없음</td></tr>{% endfor %}
+    </tbody>
+  </table></div>
+  <h3>반영하지 않은 정책(일시금·저축·대출)</h3>
+  <div class="scroll"><table>
+    <thead><tr><th>구분</th><th>정책</th><th>판정</th><th>내용</th><th>마감</th><th>공고</th></tr></thead>
+    <tbody>
+    {% for o in p.policy.not_reflected.one_off_income %}<tr><td>일시금</td><td>{{ o.policy_name }}</td><td>{{ o.certainty }}</td><td>{{ o.effect.one_off_won | won_range }}</td><td>{{ (o.action.deadline or "") | ymd }}</td><td>{% if o.action.url %}<a href="{{ o.action.url | href }}">바로가기</a>{% endif %}</td></tr>{% endfor %}
+    {% for o in p.policy.not_reflected.one_off_on_lines %}<tr><td>일시금({{ o.item }})</td><td>{{ o.policy_name }}</td><td>{{ o.verdict }}</td><td>{{ o.benefit_summary }}</td><td>{{ (o.apply.deadline or "") | ymd }}</td><td>{% if o.apply.url %}<a href="{{ o.apply.url | href }}">바로가기</a>{% endif %}</td></tr>{% endfor %}
+    {% for o in p.policy.not_reflected.savings_programs %}<tr><td>{{ o.type }}</td><td>{{ o.policy_name }}</td><td>{{ o.certainty }}</td><td>{{ o.benefit_summary }}</td><td>{{ (o.action.deadline or "") | ymd }}</td><td>{% if o.action.url %}<a href="{{ o.action.url | href }}">바로가기</a>{% endif %}</td></tr>{% endfor %}
+    {% for o in p.policy.not_reflected.loans %}<tr><td>대출</td><td>{{ o.policy }}</td><td>{{ o.verdict }}</td><td>{{ ("한도 " ~ (o.limit | manu)) if o.limit else "한도는 공고 확인" }}</td><td></td><td>{% if o.url %}<a href="{{ o.url | href }}">바로가기</a>{% endif %}</td></tr>{% endfor %}
+    </tbody>
+  </table></div>
+</section>
+
+<section id="appendix">
+  <h2>가정·출처·한계·AI 사용 기록</h2>
+  <div class="scroll"><table>
+    <thead><tr><th>항목</th><th>값</th><th>구분</th><th>확인</th><th>출처·비고</th></tr></thead>
+    <tbody>{% for a in v.assumptions %}<tr><td>{{ a.name }}</td><td>{{ a.value }}</td><td>{{ a.kind }}</td><td>{{ a.check }}</td><td class="note">{{ a.source }}{% if a.note %}. {{ a.note }}{% endif %}</td></tr>{% endfor %}</tbody>
+  </table></div>
+  <p class="note">전략 원칙 출처: 팀 예시 보고서 요약(planning/knowledge){% if s.guide.version %}, {{ s.guide.version }}{% endif %}. 대시보드의 원칙 문구는 요약본 그대로이며 AI가 지은 문장이 아닙니다. 노후 단계 구간: 25~20년 구간은 70:30으로 처리(확인 필요).</p>
+  <h3>한계</h3>
+  <ul class="note">{% for x in p.limitations %}<li>{{ x }}</li>{% endfor %}</ul>
+  <h3>AI 사용 기록</h3>
+  <p class="note">언어 모델: {{ v.provider_label }}{% if p.advice.model %}({{ p.advice.model }}){% endif %} · 호출 {{ p.advice.calls }}회 · 채택 {{ p.advice.accepted }} · 거부 {{ p.advice.rejected }}. 소비 보고서 문장: AI {{ p.spending.ai_usage.sentences_llm }}개, 템플릿 {{ p.spending.ai_usage.sentences_template }}개. 숫자는 모두 계산 엔진이 정했습니다.{% if v.llm_totals.latency_ms %} 에이전트 호출 소요 {{ (v.llm_totals.latency_ms / 1000) | man }}초{% if v.llm_totals.input_tokens is not none %}, 입력 토큰 {{ v.llm_totals.input_tokens | num }}, 출력 토큰 {{ v.llm_totals.output_tokens | num }}{% endif %}.{% endif %}</p>
+  {% if v.sentence_sources %}<p class="note">문장 작성: 주 모델 {{ v.sentence_sources.primary }}문장, 대체 모델 {{ v.sentence_sources.secondary }}문장, 템플릿 {{ v.sentence_sources.template }}문장.{% if v.fallback.enabled %} 대체 모델: {{ v.fallback.secondary.model }}, 대체 호출 {{ v.fallback.secondary_calls }}회.{% if v.fallback.switched %} 전환: {{ v.fallback.switched_at_call }}번째 호출부터 대체 모델만 사용({{ v.fallback.switch_reason }}).{% endif %}{% endif %}</p>{% endif %}
+  <h3>처리 단계</h3>
+  <div class="scroll"><table>
+    <thead><tr><th>단계</th><th>상태</th><th class="num">소요(초)</th><th>메모</th></tr></thead>
+    <tbody>{% for st in v.steps %}<tr><td>{{ st.label }}</td><td>{{ st.status_label }}</td><td class="num">{{ st.seconds }}</td><td>{{ st.memo }}</td></tr>{% endfor %}</tbody>
+  </table></div>
+</section>
+</main>
+<script>
+window.addEventListener("beforeprint", function () {
+  document.querySelectorAll("details").forEach(function (d) { d.setAttribute("data-was-open", d.open ? "1" : ""); d.open = true; });
+});
+window.addEventListener("afterprint", function () {
+  document.querySelectorAll("details").forEach(function (d) { d.open = d.getAttribute("data-was-open") === "1"; });
+});
+</script>
+</body>
+</html>

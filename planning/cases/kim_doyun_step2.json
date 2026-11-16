@@ -1,0 +1,54 @@
+{
+  "p": 300.0,
+  "p_rate": 2.8,
+  "p_date": "2024-05-01",
+  "deltap": 120.0,
+  "q": 0.0,
+  "q_rate": null,
+  "q_date": null,
+  "deltaq": null,
+  "r": 500.0,
+  "r_rate": null,
+  "r_date": "2024-01-01",
+  "deltar": 120.0,
+  "s": 0.0,
+  "s_rate": null,
+  "s_date": null,
+  "deltas": null,
+  "M": 4700.0,
+  "deltaM": 1783.2,
+  "_meta": {
+    "client": "김도윤",
+    "source_pdf": "김도윤.pdf",
+    "unit": "금액 만원, delta*는 만원/년, *_rate는 연이율 %, *_date는 가입일 YYYY-MM-DD",
+    "deltaM_detail": {
+      "a_monthly": 148.6,
+      "income_monthly": 428.0,
+      "fixed_after_monthly": 142.8,
+      "variable_after_monthly": 136.6,
+      "cut_monthly": 17.1,
+      "status": "OK",
+      "messages": []
+    },
+    "asset_detail": {
+      "p_items": [
+        "주택청약 300 @2.8% 가입 2024-05-01"
+      ],
+      "q_items": [],
+      "r_items": [
+        "연금저축 연금저축펀드 500 가입 2024-01-01"
+      ],
+      "s_items": [],
+      "M_items": [
+        "입출금 500",
+        "정기예금 1500",
+        "자유적금 700",
+        "일반계좌 지수형 ETF 2000"
+      ]
+    },
+    "warnings": [
+      "r(연금저축) 연이율이 PDF에 없음 → --rate r=<숫자>로 입력 가능"
+    ],
+    "override_applied": null
+  }
+}
