@@ -53,7 +53,7 @@ def test_main_writes_three_files_and_refuses_overwrite(tmp_path, capsys, monkeyp
     monkeypatch.setenv("LLM_PROVIDER", "none")
     mtime = CUSTOMER_DB.stat().st_mtime if CUSTOMER_DB.exists() else None
     pmtime = POLICY_DB.stat().st_mtime
-    args = ["--case", "kim_doyun", "--step2", str(KIM_STEP2), "--scenario", "potential", "--out-dir", str(tmp_path)]
+    args = ["--case", "kim_doyun", "--step2", str(KIM_STEP2), "--scenario", "potential", "--out-dir", str(tmp_path), "--format", "html"]
     assert main(args) == 0
     paths = out_paths(tmp_path, "kim_doyun", "potential")
     assert sorted(p.name for p in tmp_path.iterdir()) == sorted(p.name for p in paths.values())
@@ -70,7 +70,7 @@ def test_main_writes_three_files_and_refuses_overwrite(tmp_path, capsys, monkeyp
 
 
 def test_failure_is_one_line(tmp_path, capsys):
-    assert main(["--case", "no_such_case", "--out-dir", str(tmp_path)]) == 1
+    assert main(["--case", "no_such_case", "--out-dir", str(tmp_path), "--format", "html"]) == 1
     err = capsys.readouterr().err.strip()
     assert "\n" not in err and "프로필 적재" in err and "Traceback" not in err
     assert not list(tmp_path.iterdir())

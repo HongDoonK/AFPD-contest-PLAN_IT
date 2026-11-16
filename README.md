@@ -1,6 +1,6 @@
 # 청년 재무설계 지원 에이전트
 
-청년 고객의 Fact Finding 문서와 원천징수영수증을 읽어 정책을 매칭하고, 고정·변동 지출을 나눠 여유자금을 계산한 뒤, 주거·결혼·양육·노후 목표에 비율로 배분해 단기·중기·장기 전략을 만든다. 결과는 재무설계사가 보는 대시보드(HTML)로 나온다.
+청년 고객의 Fact Finding 문서와 원천징수영수증을 읽어 정책을 매칭하고, 고정·변동 지출을 나눠 여유자금을 계산한 뒤, 주거·결혼·양육·노후 목표에 비율로 배분해 단기·중기·장기 전략을 만든다. 결과는 재무설계사가 보는 대시보드(PDF)로 나온다.
 
 금액과 비율은 모두 계산 엔진이 정한다. LLM은 전략 카드의 순서와 문장만 맡고, 문장 속 숫자는 엔진 값과 맞는지 검사한다. LLM 없이도 템플릿 문장으로 끝까지 실행된다.
 
@@ -68,11 +68,13 @@ python -X utf8 -m planning.pipeline --case kim_doyun --llm-provider server --llm
 
 | 파일 | 내용 |
 |---|---|
-| `dashboard_<case>_<scenario>_v1.html` | 재무설계사용 대시보드 |
+| `dashboard_<case>_<scenario>_v1.pdf` | 재무설계사용 대시보드 (A4 가로) |
 | `plan_<case>_<scenario>_v1.json` | 계산 결과 전체 |
 | `ai_log_plan_<case>_<scenario>_v1.json` | LLM 호출과 문장 채택·거절 기록 |
 
-주요 옵션: `--scenario certain|potential`(확정 혜택만 / 확인 필요한 혜택 포함), `--goal-basis customer|statistical`, `--inflation 2.0`, `--force`(덮어쓰기).
+PDF는 PC에 설치된 Edge·Chrome·Chromium을 창 없이 실행해 만든다(추가 패키지 없음). 브라우저를 못 찾으면 `PDF_BROWSER` 환경변수에 실행 파일 경로를 넣거나, `--format html`로 HTML만 받는다. `--format both`는 둘 다 만든다.
+
+주요 옵션: `--format pdf|html|both`, `--scenario certain|potential`(확정 혜택만 / 확인 필요한 혜택 포함), `--goal-basis customer|statistical`, `--inflation 2.0`, `--force`(덮어쓰기).
 
 가상 고객: `kim_doyun`, `lee_seojun`, `blank_01`~`blank_04`.
 

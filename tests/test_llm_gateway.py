@@ -216,7 +216,7 @@ def test_pipeline_llm_suffix_writes_separate_files(monkeypatch, tmp_path):
     monkeypatch.setattr(urllib.request, "urlopen", gw)
     monkeypatch.setenv("LLM_API_KEY", KEY)
     args = ["--case", "kim_doyun", "--step2", str(ROOT / "planning" / "cases" / "kim_doyun_step2.json"),
-            "--out-dir", str(tmp_path), "--llm-provider", "anthropic", "--llm-model", "claude-sonnet-5-5",
+            "--out-dir", str(tmp_path), "--format", "html", "--llm-provider", "anthropic", "--llm-model", "claude-sonnet-5-5",
             "--llm-base-url", "https://gw.example.test/x", "--suffix", "_llm"]
     assert main(args) == 0
     names = sorted(p.name for p in tmp_path.iterdir())

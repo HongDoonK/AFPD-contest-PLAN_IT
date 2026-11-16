@@ -206,7 +206,7 @@ def href(url: str | None) -> str | None:
     return url if "://" in url else "https://" + url
 
 
-COL_LABELS = {"kind": "종류", "balance": "잔액", "rate_pct": "금리(%)", "matures_on": "만기", "years_to_maturity": "만기까지(년)",
+COL_LABELS = {"annual": "은퇴 뒤 연 수령", "kind": "종류", "balance": "잔액", "rate_pct": "금리(%)", "matures_on": "만기", "years_to_maturity": "만기까지(년)",
               "term": "기간", "repayment": "상환", "monthly_interest": "월 이자", "asset": "자산", "assigned": "배정",
               "policy": "정책", "item": "항목", "monthly": "월 절감", "verdict": "판정", "url": "링크",
               "certainty": "판정", "amount": "금액", "amount_text": "내용", "deadline": "마감", "limit": "한도(만원)",

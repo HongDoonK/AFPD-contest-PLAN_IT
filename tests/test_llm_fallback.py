@@ -223,7 +223,7 @@ def test_pipeline_records_fallback(env, tmp_path):
         return 200, {"choices": [{"message": {"content": answer}}], "usage": {"prompt_tokens": 40, "completion_tokens": 9}}
     env.setattr(urllib.request, "urlopen", FakeUrlopen(handler))
     args = ["--case", "kim_doyun", "--step2", str(ROOT / "planning" / "cases" / "kim_doyun_step2.json"),
-            "--out-dir", str(tmp_path), "--llm-provider", "server", "--llm-model", "gpt-6-luna",
+            "--out-dir", str(tmp_path), "--format", "html", "--llm-provider", "server", "--llm-model", "gpt-6-luna",
             "--llm-base-url", "https://gw.example.test/gateway/v1", "--llm-fallback-provider", "server", "--suffix", "_fb"]
     assert main(args) == 0
     plan = json.loads((tmp_path / "plan_kim_doyun_certain_v1_fb.json").read_text(encoding="utf-8"))

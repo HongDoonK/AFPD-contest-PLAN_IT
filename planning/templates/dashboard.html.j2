@@ -123,7 +123,24 @@ a { color:var(--mid); }
   main { max-width:none; padding:0; }
   .terms { grid-template-columns:1fr; }
   .card-head::after { content:none; }
-  section, details.card, .chart, tr { break-inside:avoid; page-break-inside:avoid; }
+  body { font-size:12px; }
+  section { margin-top:20px; }
+  section, details.card { break-inside:auto; page-break-inside:auto; }
+  .chart, tr, .kpi, .glance-row, .cf-row, .limitbar, .principles { break-inside:avoid; page-break-inside:avoid; }
+  h2, h3, h4, summary, .term-head { break-after:avoid; page-break-after:avoid; }
+  .scroll { overflow:visible; }
+  .kpis { grid-template-columns:repeat(3,1fr); }
+  .charts { grid-template-columns:1fr 1fr; }
+  th, td { word-break:keep-all; }
+  table { font-size:11px; }
+  th { white-space:normal; padding:4px 5px; }
+  td { padding:4px 5px; }
+  table.phase-many { font-size:10px; }
+  table.phase-many th, table.phase-many td { padding:3px 3px; }
+  dl.nums { grid-template-columns:1fr auto 1fr auto; gap:1px 14px; }
+  dl.nums dd { padding-right:18px; }
+  .card-body { font-size:11.5px; }
+  .stageband { font-size:11px; }
   a { color:var(--ink); }
 }
 </style>

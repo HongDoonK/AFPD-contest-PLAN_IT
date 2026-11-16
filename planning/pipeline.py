@@ -8,8 +8,9 @@
 - 기존 모듈 함수를 불러 쓰고 중간 결과는 메모리로 넘긴다. 정책 DB는 읽기 전용(?mode=ro)으로만 연다.
 - 고객 프로필 DB(customer_profiles.db)는 열지 않는다. 정책 판정·소비 보고서가 DB 형태 입력을 받으므로
   프로필을 메모리 SQLite(:memory:)에 넣어 쓴다. module_results 저장은 하지 않는다.
-- 쓰는 파일은 output/plan_<case>_<scenario>_v1.json, dashboard_<case>_<scenario>_v1.html,
+- 쓰는 파일은 output/plan_<case>_<scenario>_v1.json, dashboard_<case>_<scenario>_v1.pdf,
   ai_log_plan_<case>_<scenario>_v1.json 세 개뿐이다(--force 없이 덮어쓰지 않음).
+  대시보드는 기본이 PDF이고 --format html이면 HTML, both면 둘 다 쓴다. PDF는 설치된 Edge·Chrome으로 만든다.
 - 한 단계가 실패하면 어디서 왜 멈췄는지 한 줄로 알리고 끝낸다.
 """
 from __future__ import annotations
@@ -308,10 +309,15 @@ def run_pipeline(case_id: str, *, docs: Path | None = None, step2_path: Path | N
     return plan, ai_log
 
 
-def out_paths(out_dir: Path, case_id: str, scenario: str, suffix: str = "") -> dict[str, Path]:
+def out_paths(out_dir: Path, case_id: str, scenario: str, suffix: str = "", fmt: str = "html") -> dict[str, Path]:
     stem = f"{case_id}_{scenario}_{VERSION}{suffix}"
-    return {"plan": out_dir / f"plan_{stem}.json", "dashboard": out_dir / f"dashboard_{stem}.html",
-            "ai_log": out_dir / f"ai_log_plan_{stem}.json"}
+    paths = {"plan": out_dir / f"plan_{stem}.json"}
+    if fmt in ("html", "both"):
+        paths["dashboard"] = out_dir / f"dashboard_{stem}.html"
+    if fmt in ("pdf", "both"):
+        paths["dashboard_pdf"] = out_dir / f"dashboard_{stem}.pdf"
+    paths["ai_log"] = out_dir / f"ai_log_plan_{stem}.json"
+    return paths
 
 
 def main(argv=None) -> int:
@@ -335,13 +341,15 @@ def main(argv=None) -> int:
                         help="주 모델이 실패·소진되면 쓸 보조 공급자. 기본은 LLM_FALLBACK_PROVIDER(없으면 none)")
     parser.add_argument("--llm-fallback-model", help="기본은 LLM_FALLBACK_MODEL(없으면 Qwen/Qwen3-4B-Instruct-2507)")
     parser.add_argument("--llm-fallback-base-url", help="기본은 LLM_FALLBACK_BASE_URL(없으면 http://localhost:8080/v1)")
+    parser.add_argument("--format", choices=["pdf", "html", "both"], default="pdf",
+                        help="대시보드 형식. pdf(기본)는 설치된 Edge·Chrome으로 인쇄, html은 브라우저 없이 저장")
     parser.add_argument("--suffix", default="", help="산출물 파일명 끝에 붙임(예: _llm). 템플릿 판을 덮어쓰지 않게")
     args = parser.parse_args(argv)
 
     if not re.fullmatch(r"[A-Za-z0-9_\-]*", args.suffix):
         print("--suffix에는 영문·숫자·_·-만 쓸 수 있음", file=sys.stderr)
         return 2
-    paths = out_paths(args.out_dir, args.case, args.scenario, args.suffix)
+    paths = out_paths(args.out_dir, args.case, args.scenario, args.suffix, args.format)
     existing = [p.name for p in paths.values() if p.exists()]
     if existing and not args.force:
         print(f"이미 있음(덮어쓰지 않음, --force로 덮어씀): {', '.join(existing)}", file=sys.stderr)
@@ -365,12 +373,25 @@ def main(argv=None) -> int:
         plan["pipeline"]["steps"].append({"step": "대시보드", "status": "ok",
                                           "seconds": round(time.perf_counter() - started, 3), "warnings": []})
         html = render(plan)  # 대시보드 단계 기록을 포함해 다시 그림
+        if "dashboard_pdf" in paths:
+            from .pdf import PdfError, find_browser, html_to_pdf
+            try:
+                find_browser()  # 없으면 아무 파일도 쓰기 전에 멈춤
+            except PdfError as exc:
+                raise StepFailed("PDF 변환", exc) from exc
     except StepFailed as exc:
         print(str(exc).splitlines()[0], file=sys.stderr)
         return 1
     args.out_dir.mkdir(parents=True, exist_ok=True)
+    if "dashboard_pdf" in paths:
+        try:
+            html_to_pdf(html, paths["dashboard_pdf"])
+        except PdfError as exc:
+            print(str(StepFailed("PDF 변환", exc)).splitlines()[0], file=sys.stderr)
+            return 1
     paths["plan"].write_text(json.dumps(plan, ensure_ascii=False, indent=2), encoding="utf-8")
-    paths["dashboard"].write_text(html, encoding="utf-8")
+    if "dashboard" in paths:
+        paths["dashboard"].write_text(html, encoding="utf-8")
     paths["ai_log"].write_text(json.dumps(ai_log, ensure_ascii=False, indent=2), encoding="utf-8")
     s = plan["strategy"]["summary"]
     print(json.dumps({"case": plan["case_id"], "scenario": args.scenario, "step2": plan["step2_source"],
